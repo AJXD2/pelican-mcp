@@ -1,6 +1,6 @@
 {
   "name": "pelican-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP server for managing Pelican Panel game servers",
   "module": "index.ts",
   "main": "dist/index.js",
