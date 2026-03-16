@@ -13,10 +13,22 @@
   ],
   "scripts": {
     "start": "bun run src/index.ts",
-    "build": "bun build src/index.ts --target=node --outfile=dist/index.js && node -e \"const fs=require('fs');const f='dist/index.js';fs.writeFileSync(f,'#!/usr/bin/env node\\n'+fs.readFileSync(f,'utf8'))\""
+    "build": "bun build src/index.ts --target=node --outfile=dist/index.js && node -e \"const fs=require('fs');const f='dist/index.js';fs.writeFileSync(f,'#!/usr/bin/env node\\n'+fs.readFileSync(f,'utf8'))\"",
+    "prepublishOnly": "bun run build"
   },
-  "keywords": ["mcp", "pelican", "game-server", "pterodactyl"],
+  "keywords": ["mcp", "pelican", "game-server", "pterodactyl", "claude"],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AJXD2/pelican-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AJXD2/pelican-mcp/issues"
+  },
+  "homepage": "https://github.com/AJXD2/pelican-mcp#readme",
+  "engines": {
+    "node": ">=18"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
