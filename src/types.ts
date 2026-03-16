@@ -68,7 +68,7 @@ export interface ServerObject {
 export interface ServerResourceStats {
   current_state: string;
   is_suspended: boolean;
-  resources: {
+  resources?: {
     memory_bytes?: number;
     cpu_absolute?: number;
     disk_bytes?: number;
