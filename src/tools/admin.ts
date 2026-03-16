@@ -113,4 +113,76 @@ export function registerAdminTools(server: McpServer, client: PelicanClient) {
       return { content: [{ type: "text", text: `Server ${id} deleted.` }] };
     },
   );
+
+  server.registerTool(
+    "admin_reinstall_server",
+    {
+      description:
+        "Reinstall a server by its numeric ID (requires Application API key). This will re-run the install script.",
+      inputSchema: z.object({
+        id: z.string().describe("Numeric server ID"),
+      }),
+    },
+    async ({ id }) => {
+      await client.adminReinstallServer(id);
+      return { content: [{ type: "text", text: `Server ${id} queued for reinstall.` }] };
+    },
+  );
+
+  server.registerTool(
+    "admin_update_server",
+    {
+      description:
+        "Update a server's name, owner, or description (requires Application API key).",
+      inputSchema: z.object({
+        id: z.string().describe("Numeric server ID"),
+        name: z.string().describe("New server name"),
+        user: z.number().describe("User ID of the new owner"),
+        description: z.string().optional().describe("Server description"),
+      }),
+    },
+    async ({ id, name, user, description }) => {
+      await client.adminUpdateServerDetails(id, { name, user, description });
+      return { content: [{ type: "text", text: `Server ${id} updated: name='${name}'.` }] };
+    },
+  );
+
+  server.registerTool(
+    "admin_create_server",
+    {
+      description:
+        "Create a new server (requires Application API key). Provide server name, owner user ID, egg ID, docker image, startup command, environment variables, resource limits, and the default allocation ID.",
+      inputSchema: z.object({
+        name: z.string().describe("Server name"),
+        user: z.number().describe("Owner user ID"),
+        egg: z.number().describe("Egg ID"),
+        docker_image: z.string().describe("Docker image"),
+        startup: z.string().describe("Startup command"),
+        environment: z.record(z.string(), z.string()).default({}).describe("Environment variables"),
+        memory: z.number().describe("Memory limit in MB"),
+        swap: z.number().default(0).describe("Swap limit in MB"),
+        disk: z.number().describe("Disk limit in MB"),
+        io: z.number().default(500).describe("IO weight (10-1000)"),
+        cpu: z.number().default(0).describe("CPU limit percent (0 = unlimited)"),
+        databases: z.number().default(0),
+        allocations: z.number().default(0),
+        backups: z.number().default(0),
+        allocation_id: z.number().describe("Default allocation ID"),
+      }),
+    },
+    async ({ name, user, egg, docker_image, startup, environment, memory, swap, disk, io, cpu, databases, allocations, backups, allocation_id }) => {
+      const a = await client.adminCreateServer({
+        name,
+        user,
+        egg,
+        docker_image,
+        startup,
+        environment,
+        limits: { memory, swap, disk, io, cpu },
+        feature_limits: { databases, allocations, backups },
+        allocation: { default: allocation_id },
+      });
+      return { content: [{ type: "text", text: `Server '${name}' created (ID: ${a.attributes.id}, identifier: ${a.attributes.identifier}).` }] };
+    },
+  );
 }

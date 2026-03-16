@@ -205,4 +205,39 @@ export class PelicanClient {
       method: "DELETE",
     });
   }
+
+  async adminCreateServer(data: {
+    name: string;
+    user: number;
+    egg: number;
+    docker_image: string;
+    startup: string;
+    environment: Record<string, string>;
+    limits: { memory: number; swap: number; disk: number; io: number; cpu: number };
+    feature_limits: { databases: number; allocations: number; backups: number };
+    allocation: { default: number };
+  }): Promise<AdminServerObject> {
+    return this.request<AdminServerObject>("/api/application/servers", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async adminReinstallServer(id: string): Promise<void> {
+    await this.request(`/api/application/servers/${id}/reinstall`, {
+      method: "POST",
+    });
+  }
+
+  async adminUpdateServerDetails(id: string, data: {
+    name: string;
+    user: number;
+    description?: string;
+    external_id?: string;
+  }): Promise<AdminServerObject> {
+    return this.request<AdminServerObject>(`/api/application/servers/${id}/details`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
 }

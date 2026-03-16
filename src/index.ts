@@ -6,6 +6,8 @@ import { registerFileTools } from "./tools/files.ts";
 import { registerBackupTools } from "./tools/backups.ts";
 import { registerConsoleTools } from "./tools/console.ts";
 import { registerAdminTools } from "./tools/admin.ts";
+import { registerDatabaseTools } from "./tools/databases.ts";
+import { registerPluginTools } from "./tools/plugins.ts";
 
 const url = process.env["PELICAN_URL"];
 const key = process.env["PELICAN_API_KEY"];
@@ -23,6 +25,8 @@ registerFileTools(server, client);
 registerBackupTools(server, client);
 registerConsoleTools(server, client);
 registerAdminTools(server, client);
+registerDatabaseTools(server, client);
+registerPluginTools(server, client);
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
