@@ -62,16 +62,17 @@ export function registerServerTools(server: McpServer, client: PelicanClient) {
     async ({ id }) => {
       const res = await client.getServerResources(id);
       const r = res.resources;
-      const toMB = (b: number) => (b / 1024 / 1024).toFixed(1);
+      const toMB = (b: number | undefined) =>
+        b != null ? (b / 1024 / 1024).toFixed(1) : "N/A";
       const text = [
         `State: ${res.current_state}`,
         `Suspended: ${res.is_suspended}`,
-        `CPU: ${r.cpu_absolute.toFixed(2)}%`,
+        `CPU: ${r.cpu_absolute != null ? r.cpu_absolute.toFixed(2) + "%" : "N/A"}`,
         `Memory: ${toMB(r.memory_bytes)} MB`,
         `Disk: ${toMB(r.disk_bytes)} MB`,
         `Network RX: ${toMB(r.network_rx_bytes)} MB`,
         `Network TX: ${toMB(r.network_tx_bytes)} MB`,
-        `Uptime: ${Math.floor(r.uptime / 1000)}s`,
+        `Uptime: ${r.uptime != null ? Math.floor(r.uptime / 1000) + "s" : "N/A"}`,
       ].join("\n");
       return { content: [{ type: "text", text }] };
     },
