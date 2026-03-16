@@ -1,11 +1,22 @@
 {
   "name": "pelican-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for managing Pelican Panel game servers",
   "module": "index.ts",
-  "type": "module",
-  "private": true,
-  "scripts": {
-    "start": "bun run src/index.ts"
+  "main": "dist/index.js",
+  "bin": {
+    "pelican-mcp": "dist/index.js"
   },
+  "type": "module",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "build": "bun build src/index.ts --target=node --outfile=dist/index.js && node -e \"const fs=require('fs');const f='dist/index.js';fs.writeFileSync(f,'#!/usr/bin/env node\\n'+fs.readFileSync(f,'utf8'))\""
+  },
+  "keywords": ["mcp", "pelican", "game-server", "pterodactyl"],
+  "license": "MIT",
   "devDependencies": {
     "@types/bun": "latest"
   },
