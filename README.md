@@ -16,7 +16,8 @@ No install needed. Add to your Claude Desktop config:
       "args": ["-y", "pelican-mcp"],
       "env": {
         "PELICAN_URL": "https://your-panel.example.com",
-        "PELICAN_API_KEY": "pacc_..."
+        "PELICAN_CLIENT_API_KEY": "pacc_...",
+        "PELICAN_APP_API_KEY": "pela_..."
       }
     }
   }
@@ -41,7 +42,8 @@ Then add to your Claude Desktop config:
       "args": ["run", "/path/to/pelican-mcp/src/index.ts"],
       "env": {
         "PELICAN_URL": "https://your-panel.example.com",
-        "PELICAN_API_KEY": "pacc_..."
+        "PELICAN_CLIENT_API_KEY": "pacc_...",
+        "PELICAN_APP_API_KEY": "pela_..."
       }
     }
   }
@@ -53,9 +55,11 @@ Then add to your Claude Desktop config:
 | Variable | Description |
 |---|---|
 | `PELICAN_URL` | Base URL of your Pelican Panel instance |
-| `PELICAN_API_KEY` | API key from Account → API Credentials |
+| `PELICAN_CLIENT_API_KEY` | Client API key (`Account → API Credentials`, `pacc_...`) for server control, files, backups, and console tools |
+| `PELICAN_APP_API_KEY` | Application API key (`Admin → Application API`, `pela_...`) for `admin_*`, database, and plugin tools |
+| `PELICAN_API_KEY` | Single-key fallback used for either API type if the specific key above is not set (backward compatible) |
 
-For admin tools (`admin_*`, database, plugin management), use an **Application API** key generated in the panel's admin area.
+You can provide both `PELICAN_CLIENT_API_KEY` and `PELICAN_APP_API_KEY` together, provide only one if you only need that subset of tools, or use `PELICAN_API_KEY` alone for single-key setups.
 
 ## Tools
 

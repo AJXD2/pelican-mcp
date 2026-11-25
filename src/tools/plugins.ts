@@ -2,33 +2,6 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { PelicanClient } from "../client.ts";
 
-async function appRequest<T>(
-  client: PelicanClient,
-  path: string,
-  options: RequestInit = {},
-): Promise<T> {
-  const baseUrl: string = (client as unknown as { baseUrl: string }).baseUrl;
-  const apiKey: string = (client as unknown as { apiKey: string }).apiKey;
-  const res = await fetch(`${baseUrl}${path}`, {
-    ...options,
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      ...options.headers,
-    },
-  });
-  if (res.status === 204) return undefined as T;
-  const body = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const msg =
-      (body as { errors?: Array<{ detail?: string }> }).errors?.[0]?.detail ??
-      res.statusText;
-    throw new Error(`Pelican API error ${res.status}: ${msg}`);
-  }
-  return body as T;
-}
-
 interface PluginAttributes {
   id: string;
   name: string;
@@ -54,8 +27,7 @@ export function registerPluginTools(server: McpServer, client: PelicanClient) {
       inputSchema: z.object({}),
     },
     async () => {
-      const res = await appRequest<PaginatedResponse<PluginObject>>(
-        client,
+      const res = await client.appRequest<PaginatedResponse<PluginObject>>(
         "/api/application/plugins",
       );
       if (!res.data || res.data.length === 0) {
@@ -80,7 +52,7 @@ export function registerPluginTools(server: McpServer, client: PelicanClient) {
       }),
     },
     async ({ id }) => {
-      await appRequest<void>(client, `/api/application/plugins/${id}/install`, {
+      await client.appRequest<void>(`/api/application/plugins/${id}/install`, {
         method: "POST",
       });
       return {
@@ -102,7 +74,7 @@ export function registerPluginTools(server: McpServer, client: PelicanClient) {
       }),
     },
     async ({ id, delete_data }) => {
-      await appRequest<void>(client, `/api/application/plugins/${id}/uninstall`, {
+      await client.appRequest<void>(`/api/application/plugins/${id}/uninstall`, {
         method: "POST",
         body: JSON.stringify({ delete: delete_data }),
       });
@@ -121,7 +93,7 @@ export function registerPluginTools(server: McpServer, client: PelicanClient) {
       }),
     },
     async ({ id }) => {
-      await appRequest<void>(client, `/api/application/plugins/${id}/enable`, {
+      await client.appRequest<void>(`/api/application/plugins/${id}/enable`, {
         method: "POST",
       });
       return {
@@ -139,7 +111,7 @@ export function registerPluginTools(server: McpServer, client: PelicanClient) {
       }),
     },
     async ({ id }) => {
-      await appRequest<void>(client, `/api/application/plugins/${id}/disable`, {
+      await client.appRequest<void>(`/api/application/plugins/${id}/disable`, {
         method: "POST",
       });
       return {
@@ -158,7 +130,7 @@ export function registerPluginTools(server: McpServer, client: PelicanClient) {
       }),
     },
     async ({ id }) => {
-      await appRequest<void>(client, `/api/application/plugins/${id}/update`, {
+      await client.appRequest<void>(`/api/application/plugins/${id}/update`, {
         method: "POST",
       });
       return {

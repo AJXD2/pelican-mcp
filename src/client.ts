@@ -19,21 +19,57 @@ export class PelicanError extends Error {
   }
 }
 
+export interface PelicanClientKeys {
+  clientKey?: string;
+  appKey?: string;
+}
+
 export class PelicanClient {
+  private clientKey?: string;
+  private appKey?: string;
+
   constructor(
     private baseUrl: string,
-    private apiKey: string,
+    apiKeyOrKeys: string | PelicanClientKeys,
   ) {
     // Strip trailing slash
     this.baseUrl = baseUrl.replace(/\/$/, "");
+    if (typeof apiKeyOrKeys === "string") {
+      this.clientKey = apiKeyOrKeys;
+      this.appKey = apiKeyOrKeys;
+    } else {
+      this.clientKey = apiKeyOrKeys.clientKey;
+      this.appKey = apiKeyOrKeys.appKey;
+    }
+  }
+
+  private getKeyForPath(path: string): string {
+    if (path.startsWith("/api/application/")) {
+      if (!this.appKey) {
+        throw new PelicanError(
+          401,
+          "This tool requires an Application API key. Set PELICAN_APP_API_KEY (or PELICAN_API_KEY).",
+        );
+      }
+      return this.appKey;
+    }
+
+    if (!this.clientKey) {
+      throw new PelicanError(
+        401,
+        "This tool requires a Client API key. Set PELICAN_CLIENT_API_KEY (or PELICAN_API_KEY).",
+      );
+    }
+    return this.clientKey;
   }
 
   private async request<T>(path: string, options: RequestInit = {}): Promise<T> {
+    const apiKey = this.getKeyForPath(path);
     const url = `${this.baseUrl}${path}`;
     const res = await fetch(url, {
       ...options,
       headers: {
-        Authorization: `Bearer ${this.apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
         Accept: "application/json",
         ...options.headers,
@@ -52,6 +88,10 @@ export class PelicanClient {
     }
 
     return body as T;
+  }
+
+  async appRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+    return this.request<T>(path, options);
   }
 
   // ─── Client API: Servers ────────────────────────────────────────────────────
@@ -99,11 +139,12 @@ export class PelicanClient {
   }
 
   async readFile(id: string, file: string): Promise<string> {
+    const apiKey = this.getKeyForPath("/api/client/");
     const params = new URLSearchParams({ file });
     const url = `${this.baseUrl}/api/client/servers/${id}/files/contents?${params}`;
     const res = await fetch(url, {
       headers: {
-        Authorization: `Bearer ${this.apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         Accept: "text/plain",
       },
     });
@@ -114,12 +155,13 @@ export class PelicanClient {
   }
 
   async writeFile(id: string, file: string, contents: string): Promise<void> {
+    const apiKey = this.getKeyForPath("/api/client/");
     const params = new URLSearchParams({ file });
     const url = `${this.baseUrl}/api/client/servers/${id}/files/write?${params}`;
     const res = await fetch(url, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${this.apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "text/plain",
       },
       body: contents,

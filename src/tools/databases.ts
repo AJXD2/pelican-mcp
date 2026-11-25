@@ -2,33 +2,6 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { PelicanClient } from "../client.ts";
 
-async function appRequest<T>(
-  client: PelicanClient,
-  path: string,
-  options: RequestInit = {},
-): Promise<T> {
-  const baseUrl: string = (client as unknown as { baseUrl: string }).baseUrl;
-  const apiKey: string = (client as unknown as { apiKey: string }).apiKey;
-  const res = await fetch(`${baseUrl}${path}`, {
-    ...options,
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      ...options.headers,
-    },
-  });
-  if (res.status === 204) return undefined as T;
-  const body = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const msg =
-      (body as { errors?: Array<{ detail?: string }> }).errors?.[0]?.detail ??
-      res.statusText;
-    throw new Error(`Pelican API error ${res.status}: ${msg}`);
-  }
-  return body as T;
-}
-
 interface DatabaseAttributes {
   id: number;
   name: string;
@@ -54,8 +27,7 @@ export function registerDatabaseTools(server: McpServer, client: PelicanClient) 
       }),
     },
     async ({ id }) => {
-      const res = await appRequest<PaginatedResponse<DatabaseObject>>(
-        client,
+      const res = await client.appRequest<PaginatedResponse<DatabaseObject>>(
         `/api/application/servers/${id}/databases`,
       );
       if (res.data.length === 0) {
@@ -86,8 +58,7 @@ export function registerDatabaseTools(server: McpServer, client: PelicanClient) 
       }),
     },
     async ({ id, database, remote, host }) => {
-      const db = await appRequest<DatabaseObject>(
-        client,
+      const db = await client.appRequest<DatabaseObject>(
         `/api/application/servers/${id}/databases`,
         {
           method: "POST",
@@ -113,8 +84,7 @@ export function registerDatabaseTools(server: McpServer, client: PelicanClient) 
       }),
     },
     async ({ id, database_id }) => {
-      await appRequest<void>(
-        client,
+      await client.appRequest<void>(
         `/api/application/servers/${id}/databases/${database_id}`,
         { method: "DELETE" },
       );
