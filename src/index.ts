@@ -10,14 +10,18 @@ import { registerDatabaseTools } from "./tools/databases.ts";
 import { registerPluginTools } from "./tools/plugins.ts";
 
 const url = process.env["PELICAN_URL"];
-const key = process.env["PELICAN_API_KEY"];
+const fallbackKey = process.env["PELICAN_API_KEY"];
+const clientKey = process.env["PELICAN_CLIENT_API_KEY"] || fallbackKey;
+const appKey = process.env["PELICAN_APP_API_KEY"] || fallbackKey;
 
-if (!url || !key) {
-  console.error("Error: PELICAN_URL and PELICAN_API_KEY environment variables must be set.");
+if (!url || (!clientKey && !appKey)) {
+  console.error(
+    "Error: PELICAN_URL and at least one API key (PELICAN_API_KEY, PELICAN_CLIENT_API_KEY, or PELICAN_APP_API_KEY) must be set.",
+  );
   process.exit(1);
 }
 
-const client = new PelicanClient(url, key);
+const client = new PelicanClient(url, { clientKey, appKey });
 const server = new McpServer({ name: "pelican-mcp", version: "1.0.0" });
 
 registerServerTools(server, client);
